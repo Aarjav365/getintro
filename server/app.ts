@@ -204,7 +204,7 @@ app.post('/claim/send-code', catchAsync(async (req, res) => {
     appUrl: publicAppUrl(),
   });
 
-  /** Resend Node.js SDK: https://resend.com/docs/send-with-nextjs — `html`/`text`, check `{ data, error }`; idempotency on 2nd arg. */
+  /** Resend Node SDK in Express (not Next.js): https://resend.com/docs/api-reference/emails/send-email — same `resend` package as https://resend.com/docs/send-with-nextjs */
   let sendResult: Awaited<ReturnType<typeof resend.emails.send>>;
   try {
     sendResult = await resend.emails.send(
