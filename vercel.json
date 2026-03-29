@@ -7,7 +7,7 @@
     }
   ],
   "functions": {
-    "api/[[...path]].ts": {
+    "server.ts": {
       "maxDuration": 30
     }
   }
