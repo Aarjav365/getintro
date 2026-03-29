@@ -1,12 +1,16 @@
 /**
- * Single Express entry for Vercel. Nested `api/claim/*.ts` files are not reliable with
- * current Node function bundling → FUNCTION_INVOCATION_FAILED at runtime.
- * `vercel.json` rewrites `/api/*` → `/api` so all API traffic hits this module.
+ * Vercel: use legacy Node (req, res) handler so Express is invoked correctly.
+ * Subpaths are preserved via `vercel.json` → `__v_path` query (see server/app.ts).
  */
+import type { VercelApiHandler } from '@vercel/node';
 import app from '../server/app.js';
 
 export const config = {
   maxDuration: 60,
 };
 
-export default app;
+const handler: VercelApiHandler = (req, res) => {
+  app(req, res);
+};
+
+export default handler;
