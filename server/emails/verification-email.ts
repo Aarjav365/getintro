@@ -1,6 +1,7 @@
 /**
- * Transactional email: waitlist handle claim — 6-digit code verification.
- * HTML is table-based for client compatibility; always include `text` for accessibility.
+ * Transactional OTP email for waitlist handle claim (6-digit code).
+ * Built as `html` + `text` for `resend.emails.send()` — same pattern as
+ * https://resend.com/docs/send-with-nextjs (Next.js uses the same Node SDK).
  */
 
 export type VerificationEmailParams = {
