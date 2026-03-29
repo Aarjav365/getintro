@@ -5,10 +5,5 @@
       "source": "/((?!api/|assets/).*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "server.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
