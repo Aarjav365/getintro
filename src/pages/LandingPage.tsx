@@ -76,8 +76,8 @@ export function LandingPage() {
           }}
           className="text-[15px] font-normal text-white/70 max-w-[600px] leading-relaxed"
         >
-          Bypass the noise and gatekeepers. Our curated network connects ambitious founders, investors, and creators
-          directly with the individuals who can accelerate their vision.
+          Say Fuck Off To Cold Emails and Connect with Ambitious Founders, Investors, and Creators
+          To accelerate Your vision.
         </motion.p>
       </div>
 
