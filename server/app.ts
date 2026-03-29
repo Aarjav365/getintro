@@ -11,6 +11,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
+
+/** Vercel invokes with paths like `/api/claim/...`; local dev proxy strips `/api` before hitting Express. */
+app.use((req, _res, next) => {
+  if (req.url?.startsWith('/api')) {
+    req.url = req.url.slice(4) || '/';
+  }
+  next();
+});
+
 app.use(express.json({ limit: '32kb' }));
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
