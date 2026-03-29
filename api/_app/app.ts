@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import { Resend } from 'resend';
-import { buildVerificationEmail } from './emails/verification-email';
+import { buildVerificationEmail } from './emails/verification-email.js';
 
 /** Express 4 does not catch `async` rejections — forward to error handler so the client always gets JSON. */
 function catchAsync(
@@ -19,7 +19,7 @@ function catchAsync(
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 if (!process.env.VERCEL) {
-  dotenv.config({ path: path.resolve(__dirname, '../.env') });
+  dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 }
 
 const app = express();

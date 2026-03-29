@@ -1,16 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "api/claim/send-code.ts": {
-      "includeFiles": "server/**"
-    },
-    "api/claim/verify.ts": {
-      "includeFiles": "server/**"
-    },
-    "api/health.ts": {
-      "includeFiles": "server/**"
-    }
-  },
   "rewrites": [
     {
       "source": "/((?!api/|assets/).*)",

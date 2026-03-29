@@ -1,7 +1,7 @@
 /**
  * Transactional OTP email for waitlist handle claim (6-digit code).
  * React+Vite frontend; this module is used from Express only. `html` + `text`
- * for `resend.emails.send()` — same Node SDK as Resend’s Next.js examples:
+ * for `resend.emails.send()` — same Node SDK as Resend's Next.js examples:
  * https://resend.com/docs/send-with-nextjs (reference only; we are not Next.js).
  */
 

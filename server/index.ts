@@ -1,4 +1,4 @@
-import app from './app';
+import app from '../api/_app/app.js';
 
 /** Default 3005 — avoids clashing with Vite’s port fallback when 3002 is busy */
 const PORT = Number(process.env.API_PORT || 3005);
