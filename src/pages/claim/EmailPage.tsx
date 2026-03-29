@@ -138,7 +138,7 @@ export function EmailPage() {
         onClick={() => navigate('/')}
         className="text-[14px] text-white/40 hover:text-white/70 transition-colors"
       >
-        ← Back .
+        ← Back 
       </button>
     </div>
   );
