@@ -25,20 +25,12 @@ if (!process.env.VERCEL) {
 const app = express();
 
 /**
- * - Vite dev proxy strips `/api` before Express (paths are already `/claim/...`).
- * - On Vercel we rewrite `/api/:path*` → `/api?__v_path=:path*` so the subpath survives
- *   as a query param (the bare `/api` rewrite alone can drop `req.originalUrl` past `/api`).
+ * Vite dev proxy strips `/api` before Express (paths are already `/claim/...`).
+ * On Vercel, each URL is handled by its own `api/.../*.ts` file; `originalUrl` is still `/api/...`.
  */
 app.use((req, _res, next) => {
   const raw = req.originalUrl ?? req.url ?? '/';
-  const qIdx = raw.indexOf('?');
-  const search = qIdx >= 0 ? raw.slice(qIdx + 1) : '';
-  const vp = new URLSearchParams(search).get('__v_path');
-  if (vp) {
-    req.url = '/' + vp.replace(/^\/+/, '');
-    return next();
-  }
-  const pathname = qIdx >= 0 ? raw.slice(0, qIdx) : raw;
+  const pathname = raw.split('?')[0] ?? '/';
   if (pathname.startsWith('/api')) {
     req.url = pathname.slice(4) || '/';
   }

@@ -1,19 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/index.ts": {
+    "api/claim/send-code.ts": {
+      "includeFiles": "server/**"
+    },
+    "api/claim/verify.ts": {
+      "includeFiles": "server/**"
+    },
+    "api/health.ts": {
       "includeFiles": "server/**"
     }
   },
   "rewrites": [
-    {
-      "source": "/api",
-      "destination": "/api"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api?__v_path=:path*"
-    },
     {
       "source": "/((?!api/|assets/).*)",
       "destination": "/index.html"
