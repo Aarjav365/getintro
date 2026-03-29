@@ -15,8 +15,6 @@
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
-    "@react-email/components": "^1.0.10",
-    "@react-email/render": "^2.0.4",
     "@supabase/supabase-js": "^2.49.1",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",

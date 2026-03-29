@@ -4,24 +4,13 @@ import { fileURLToPath } from 'node:url';
 import { createHash, randomInt } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import express from 'express';
-import { render, toPlainText } from '@react-email/render';
 import { Resend } from 'resend';
-import VerificationEmail from './emails/VerificationEmail';
-import { getVerificationEmailSubject } from './emails/verification-email';
+import { buildVerificationEmail } from './emails/verification-email';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
-
-/** Vercel invokes this app with paths like `/api/claim/...`; local dev uses `/claim/...` (Vite strips `/api`). */
-app.use((req, _res, next) => {
-  if (req.url?.startsWith('/api')) {
-    req.url = req.url.slice(4) || '/';
-  }
-  next();
-});
-
 app.use(express.json({ limit: '32kb' }));
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
@@ -165,38 +154,22 @@ app.post('/claim/send-code', async (req, res) => {
     return;
   }
 
-  const subject = getVerificationEmailSubject({ username, code, appName: APP_NAME });
-  const appUrl = publicAppUrl();
-
-  /** Pre-render to HTML — Resend’s `react` prop often fails on Vercel serverless; `html` + `text` is reliable. */
-  let html: string;
-  let text: string;
-  try {
-    const node = VerificationEmail({
-      username,
-      code,
-      expiresMinutes: CODE_TTL_MS / 60_000,
-      appName: APP_NAME,
-      appUrl: appUrl || undefined,
-    });
-    html = await render(node);
-    text = toPlainText(html);
-  } catch (e) {
-    console.error('[api] render verification email', e);
-    res.status(500).json({
-      error: 'Could not build the email. Try again.',
-    });
-    return;
-  }
+  const emailContent = buildVerificationEmail({
+    username,
+    code,
+    expiresMinutes: CODE_TTL_MS / 60_000,
+    appName: APP_NAME,
+    appUrl: publicAppUrl(),
+  });
 
   let sendResult: Awaited<ReturnType<typeof resend.emails.send>>;
   try {
     sendResult = await resend.emails.send({
       from: RESEND_FROM,
       to: [email],
-      subject,
-      html,
-      text,
+      subject: emailContent.subject,
+      html: emailContent.html,
+      text: emailContent.text,
       headers: {
         'Idempotency-Key': `claim-code/${email}/${username}/${expiresAt}`,
       },

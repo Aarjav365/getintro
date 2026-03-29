@@ -4,27 +4,13 @@ import { useState, type FormEvent } from 'react';
 type View = 'landing' | 'email' | 'sending' | 'code' | 'verifying' | 'success' | 'error';
 
 async function readApiError(res: Response): Promise<string> {
-  const ct = res.headers.get('content-type') ?? '';
-  if (ct.includes('text/html')) {
-    return 'We could not reach the sign-up service. Refresh and try again — if it persists, redeploy so /api routes are not sent the app HTML.';
-  }
-  const raw = await res.text();
   try {
-    const j = JSON.parse(raw) as {
-      error?: string | { message?: string };
-      message?: string;
-    };
-    if (typeof j.error === 'string') return j.error;
-    if (j.error && typeof j.error === 'object' && typeof j.error.message === 'string') {
-      return j.error.message;
-    }
-    if (typeof j.message === 'string') return j.message;
+    const j = (await res.json()) as { error?: string };
+    if (j?.error && typeof j.error === 'string') return j.error;
   } catch {
-    /* not JSON */
+    /* ignore */
   }
-  const snippet = raw.trim().slice(0, 160);
-  if (snippet) return `Error (${res.status}): ${snippet}`;
-  return `Something went sideways (${res.status}). Try again.`;
+  return 'Something went sideways. Try again.';
 }
 
 export default function App() {

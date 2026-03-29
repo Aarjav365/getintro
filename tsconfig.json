@@ -23,5 +23,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["src/**/*", "server/**/*", "server.ts"]
+  "include": ["src/**/*", "server/**/*", "api/**/*"]
 }
