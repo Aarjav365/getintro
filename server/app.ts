@@ -18,14 +18,20 @@ function catchAsync(
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+if (!process.env.VERCEL) {
+  dotenv.config({ path: path.resolve(__dirname, '../.env') });
+}
 
 const app = express();
 
-/** Vercel invokes with paths like `/api/claim/...`; local dev proxy strips `/api` before hitting Express. */
+/**
+ * Vite dev proxy strips `/api` before hitting Express. On Vercel, `vercel.json` rewrites
+ * `/api/*` → `/api`, so we must use `originalUrl` to recover `/api/claim/...` for routing.
+ */
 app.use((req, _res, next) => {
-  if (req.url?.startsWith('/api')) {
-    req.url = req.url.slice(4) || '/';
+  const pathOnly = (req.originalUrl ?? req.url ?? '/').split('?')[0] ?? '/';
+  if (pathOnly.startsWith('/api')) {
+    req.url = pathOnly.slice(4) || '/';
   }
   next();
 });
