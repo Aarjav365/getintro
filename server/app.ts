@@ -94,6 +94,18 @@ const supabaseAdmin =
 
 const resend = RESEND_KEY ? new Resend(RESEND_KEY) : null;
 
+/**
+ * Avoid Express’s default “Cannot GET /” when someone opens the API port directly.
+ * The web UI is Vite (dev: http://127.0.0.1:3002) or your Vercel deployment — not this server.
+ */
+app.get('/', (_req, res) => {
+  res.json({
+    service: 'getintro-api',
+    message:
+      'This host is the API only. For the app, use the Vite dev URL (port 3002 locally) or your production domain. Try GET /health.',
+  });
+});
+
 /** For ops and local e2e checks — no secrets returned */
 app.get('/health', (_req, res) => {
   res.json({
