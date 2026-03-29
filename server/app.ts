@@ -4,8 +4,18 @@ import { fileURLToPath } from 'node:url';
 import { createHash, randomInt } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { Resend } from 'resend';
 import { buildVerificationEmail } from './emails/verification-email';
+
+/** Express 4 does not catch `async` rejections — forward to error handler so the client always gets JSON. */
+function catchAsync(
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
+) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    void fn(req, res, next).catch(next);
+  };
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -97,8 +107,13 @@ app.get('/health', (_req, res) => {
   });
 });
 
+/** Resend idempotency keys max 256 chars — hash so long emails never exceed the limit. */
+function claimIdempotencyKey(email: string, username: string, expiresAtIso: string) {
+  return createHash('sha256').update(`claim-code:${email}:${username}:${expiresAtIso}`).digest('hex');
+}
+
 /** Mounted under /api on Vercel — full path is /api/claim/... */
-app.post('/claim/send-code', async (req, res) => {
+app.post('/claim/send-code', catchAsync(async (req, res) => {
   if (!supabaseAdmin || !resend || !RESEND_FROM) {
     res.status(500).json({ error: 'Server is not configured for email.' });
     return;
@@ -171,18 +186,20 @@ app.post('/claim/send-code', async (req, res) => {
     appUrl: publicAppUrl(),
   });
 
+  /** Resend Node.js SDK: https://resend.com/docs/send-with-nextjs — `html`/`text`, check `{ data, error }`; idempotency on 2nd arg. */
   let sendResult: Awaited<ReturnType<typeof resend.emails.send>>;
   try {
-    sendResult = await resend.emails.send({
-      from: RESEND_FROM,
-      to: [email],
-      subject: emailContent.subject,
-      html: emailContent.html,
-      text: emailContent.text,
-      headers: {
-        'Idempotency-Key': `claim-code/${email}/${username}/${expiresAt}`,
+    sendResult = await resend.emails.send(
+      {
+        from: RESEND_FROM,
+        to: [email],
+        subject: emailContent.subject,
+        html: emailContent.html,
+        text: emailContent.text,
+        tags: [{ name: 'flow', value: 'otp_verify' }],
       },
-    });
+      { idempotencyKey: claimIdempotencyKey(email, username, expiresAt) }
+    );
   } catch (e) {
     console.error('[api] Resend network error', e);
     res.status(502).json({ error: 'Could not send the email. Try again shortly.' });
@@ -192,16 +209,22 @@ app.post('/claim/send-code', async (req, res) => {
   const { data, error } = sendResult;
 
   if (error) {
+    const detail =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? String((error as { message: string }).message)
+        : '';
     console.error('[api] Resend error', error);
-    res.status(502).json({ error: 'Could not send the email. Try again shortly.' });
+    res.status(502).json({
+      error: detail ? `Could not send the email: ${detail}` : 'Could not send the email. Try again shortly.',
+    });
     return;
   }
 
   console.log('[api] Resend ok', data?.id);
   res.json({ ok: true });
-});
+}));
 
-app.post('/claim/verify', async (req, res) => {
+app.post('/claim/verify', catchAsync(async (req, res) => {
   if (!supabaseAdmin) {
     res.status(500).json({ error: 'Server is not configured.' });
     return;
@@ -270,6 +293,12 @@ app.post('/claim/verify', async (req, res) => {
   }
 
   res.json({ ok: true });
+}));
+
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('[api] unhandled', err);
+  if (res.headersSent) return;
+  res.status(500).json({ error: 'Something went wrong on the server. Try again.' });
 });
 
 export default app;

@@ -24,6 +24,9 @@ async function readApiError(res: Response): Promise<string> {
   }
   const snippet = raw.trim().slice(0, 160);
   if (snippet) return `Error (${res.status}): ${snippet}`;
+  if (res.status >= 500) {
+    return `Server error (${res.status}) with no message body. If this persists, check the API logs, env vars (Supabase + Resend), and GET /api/health.`;
+  }
   return `Something went sideways (${res.status}). Try again.`;
 }
 
