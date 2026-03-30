@@ -76,7 +76,7 @@ export function LandingPage() {
           }}
           className="text-[15px] font-normal text-white/70 max-w-[600px] leading-relaxed"
         >
-          Say Fuck Off To Cold Emails and Connect with Ambitious Founders, Investors, and Creators
+          Connect with Ambitious Founders, Investors, and Creators
           To accelerate Your vision.
         </motion.p>
       </div>
