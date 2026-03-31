@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 
 export function RootLayout() {
   const location = useLocation();
@@ -37,6 +38,8 @@ export function RootLayout() {
           </AnimatePresence>
         </main>
       </div>
+
+      <Analytics />
     </div>
   );
 }
