@@ -50,8 +50,8 @@ export function LandingPage() {
       >
         <div className="w-1 h-1 rounded-full bg-white"></div>
         <span className="text-[13px] font-medium">
-          <span className="text-white/60">Private network opening</span>
-          <span className="text-white"> Dec 1, 2026</span>
+          <span className="text-white/60">Claim Your Username</span>
+          <span className="text-white"></span>
         </span>
       </motion.div>
 
