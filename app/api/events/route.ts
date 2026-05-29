@@ -2,6 +2,7 @@ import { store } from '@/lib/store';
 import type { SSEEvent } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET() {
   const encoder = new TextEncoder();

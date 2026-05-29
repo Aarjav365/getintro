@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server';
 import { store } from '@/lib/store';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 const DRAFTS: Record<string, Record<string, string>> = {
   draft: {
     default: "Thanks for reaching out — this looks interesting. Can you share more context and we can go from there?",
@@ -35,19 +38,19 @@ function getDraft(requestId: string, tone: string): string {
   return toneMap[requestId] || toneMap.default || DRAFTS.draft.default;
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   const tone = req.nextUrl.searchParams.get('tone') || 'draft';
-  const request = store.getById(params.id);
+  const request = store.getById(id);
   if (!request) {
     return new Response('Not found', { status: 404 });
   }
 
-  const text = getDraft(params.id, tone);
+  const text = getDraft(id, tone);
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      // Stream characters with slight delay for typing effect
       for (const char of text) {
         const data = JSON.stringify({ type: 'char', char });
         controller.enqueue(encoder.encode(`data: ${data}\n\n`));

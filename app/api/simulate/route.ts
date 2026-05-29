@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import type { Request } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 const FAKE_SENDERS = [
   { name: 'Ava Thornton', role: 'Founder · Petal AI', color: 'pink' as const, initials: 'AT' },
   { name: 'Marcus Webb', role: 'Partner · Emergence Capital', color: 'blue' as const, initials: 'MW' },

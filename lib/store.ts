@@ -1,8 +1,7 @@
-import { EventEmitter } from 'events';
 import type { Request, SSEEvent } from './types';
 import { requests as seedRequests } from './data';
 
-class RequestStore extends EventEmitter {
+class RequestStore {
   private requests: Request[] = seedRequests.map(r => ({ ...r, createdAt: new Date().toISOString() }));
   private clients = new Set<(event: SSEEvent) => void>();
 
@@ -48,7 +47,6 @@ class RequestStore extends EventEmitter {
   }
 }
 
-// Singleton — survives hot reload in dev via global
 const globalStore = globalThis as unknown as { __giStore?: RequestStore };
 if (!globalStore.__giStore) {
   globalStore.__giStore = new RequestStore();
